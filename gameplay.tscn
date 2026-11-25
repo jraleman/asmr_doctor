@@ -1,0 +1,371 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/game/game_shell.tscn" id="1_shell"]
+[ext_resource type="Script" path="res://games/asmr_doctor/gameplay.gd" id="2_game"]
+[ext_resource type="Script" path="res://games/asmr_doctor/clinic_view.gd" id="3_view"]
+[ext_resource type="Script" path="res://games/asmr_doctor/soundscape.gd" id="4_audio"]
+[ext_resource type="Script" path="res://games/asmr_doctor/microphone.gd" id="5_mic"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_glass"]
+content_margin_left = 22.0
+content_margin_top = 18.0
+content_margin_right = 22.0
+content_margin_bottom = 18.0
+bg_color = Color(0.13, 0.16, 0.17, 0.72)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.77, 0.84, 0.72, 0.25)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_left = 18
+corner_radius_bottom_right = 18
+
+[node name="ASMRDoctor" instance=ExtResource("1_shell")]
+script = ExtResource("2_game")
+
+[node name="Soundscape" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_audio")
+
+[node name="Microphone" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("5_mic")
+
+[node name="Clinic" type="Control" parent="HUD/Overlay" index="1"]
+unique_name_in_owner = true
+offset_left = 30.0
+offset_top = 100.0
+offset_right = 1890.0
+offset_bottom = 1040.0
+
+[node name="Layout" type="VBoxContainer" parent="HUD/Overlay/Clinic"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+
+[node name="ClinicHeader" type="HFlowContainer" parent="HUD/Overlay/Clinic/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
+
+[node name="ShiftLabel" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.965, 0.9, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+text = "THE LITTLE CLINIC"
+autowrap_mode = 3
+
+[node name="WalletLabel" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "0 Kindness Tokens"
+autowrap_mode = 3
+
+[node name="JournalButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Journal"
+
+[node name="SoundsButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Soundscapes"
+
+[node name="RestButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rest mode"
+
+[node name="ClinicMenu" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Menu / Decor"
+tooltip_text = "Pause, Settings, Guide and the cosmetic Decor Store"
+
+[node name="CompactMenu" type="MenuButton" parent="HUD/Overlay/Clinic/Layout/ClinicHeader"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Clinic menu"
+tooltip_text = "Journal, soundscapes, rest, pause, settings and clinic decor"
+
+[node name="ClinicBody" type="BoxContainer" parent="HUD/Overlay/Clinic/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="RoomColumn" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.7
+
+[node name="ClinicView" type="Control" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("3_view")
+interactive = true
+
+[node name="SoundCaption" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.82, 0.76, 1)
+theme_override_font_sizes/font_size = 13
+text = "Rain at the window. A tiny fire. A room to breathe."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="PatientPanel" type="PanelContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBox_glass")
+
+[node name="PatientStack" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PatientScroll" type="ScrollContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="PatientDetails" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="AppointmentLabel" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.77, 0.84, 0.72, 1)
+theme_override_font_sizes/font_size = 12
+text = "TODAY'S VISITOR / 1 OF 3"
+autowrap_mode = 3
+
+[node name="PatientName" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.965, 0.9, 0.78, 1)
+theme_override_font_sizes/font_size = 32
+text = "Mira"
+autowrap_mode = 3
+
+[node name="PatientRole" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+
+[node name="Dialogue" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="CalmLabel" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "20% calm"
+
+[node name="CalmMeter" type="ProgressBar" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+step = 0.1
+value = 20.0
+show_percentage = false
+accessibility_name = "Patient calm"
+
+[node name="Reaction" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.79, 0.85, 0.75, 1)
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+
+[node name="TreatmentControls" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TrayLabel" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails/TreatmentControls"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "YOUR TREATMENT TRAY"
+
+[node name="ToolTray" type="GridContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails/TreatmentControls"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="ToolHint" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/PatientScroll/PatientDetails/TreatmentControls"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+
+[node name="CareDock" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CareButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/CareDock"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Hold to reassure"
+autowrap_mode = 3
+
+[node name="MicRow" type="HBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/CareDock"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MicButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/CareDock/MicRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enable mic"
+
+[node name="MicMeter" type="ProgressBar" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/CareDock/MicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 12)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.5
+step = 0.01
+show_percentage = false
+accessibility_name = "Local microphone sound level"
+
+[node name="MicStatus" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/CareDock"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Mic off. Optional, local, never recorded."
+autowrap_mode = 3
+
+[node name="NextPatient" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Welcome the next patient"
+autowrap_mode = 3
+
+[node name="RestScroll" type="ScrollContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="RestCopy" type="VBoxContainer" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/RestScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 22
+
+[node name="Heading" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/RestScroll/RestCopy"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Your turn to rest."
+autowrap_mode = 3
+
+[node name="Body" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/RestScroll/RestCopy"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "No appointments. No score. No microphone.\n\nJust your little room and its sounds.\n\nYour patient will be here when you're ready. Rest mode makes no treatment or reward progress."
+autowrap_mode = 3
+
+[node name="ReturnFromRest" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicBody/PatientPanel/PatientStack/RestScroll/RestCopy"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Return to the clinic"
+autowrap_mode = 3
+
+[node name="SaveRow" type="HBoxContainer" parent="HUD/Overlay/Clinic/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveStatus" type="Label" parent="HUD/Overlay/Clinic/Layout/SaveRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Completed care and discoveries save automatically."
+autowrap_mode = 3
+
+[node name="RetrySave" type="Button" parent="HUD/Overlay/Clinic/Layout/SaveRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Retry save"
+
+[node name="SheetShade" type="ColorRect" parent="HUD/Overlay" index="2"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.09, 0.1, 0.82)
+
+[node name="SheetPanel" type="PanelContainer" parent="HUD/Overlay/SheetShade"]
+unique_name_in_owner = true
+theme_override_styles/panel = SubResource("StyleBox_glass")
+
+[node name="SheetScroll" type="ScrollContainer" parent="HUD/Overlay/SheetShade/SheetPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="SheetContent" type="VBoxContainer" parent="HUD/Overlay/SheetShade/SheetPanel/SheetScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="Caption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Overview/Hits/Layout" index="0"]
+text = "GENTLE ACTIONS"
+
+[node name="Caption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Overview/Accuracy/Layout" index="0"]
+text = "STEADY CARE"
+
+[node name="ScoreCaption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Report/Players/PlayerOne/Layout" index="2"]
+text = "CARE GIVEN"
+
+[node name="HitsCaption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Report/Players/PlayerOne/Layout/Stats" index="0"]
+text = "Gentle actions"
+
+[node name="MissesCaption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Report/Players/PlayerOne/Layout/Stats" index="2"]
+text = "Startles"
+
+[node name="AccuracyCaption" parent="HUD/RoundOver/Center/ScorePanel/Layout/Report/Players/PlayerOne/Layout/Stats" index="4"]
+text = "Steady care"

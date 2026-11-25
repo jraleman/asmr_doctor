@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#f2e6d3"/><stop offset="1" stop-color="#dcc4b1"/></linearGradient>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#abc6bc"/><stop offset="1" stop-color="#e5e6ca"/></linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="54" fill="#303b3c"/>
+  <rect x="30" y="30" width="964" height="964" rx="38" fill="url(#wall)"/>
+  <text x="512" y="126" text-anchor="middle" fill="#7b756e" font-family="sans-serif" font-size="21" letter-spacing="8">THE LITTLE CLINIC OF CALM</text>
+  <text x="512" y="225" text-anchor="middle" fill="#4d5e59" font-family="serif" font-size="92">ASMR Doctor</text>
+  <text x="512" y="275" text-anchor="middle" fill="#887c78" font-family="sans-serif" font-size="24" letter-spacing="2">a little care. a little quieter.</text>
+  <path d="M333 620V452a179 179 0 0 1 358 0v168z" fill="#bba28e"/>
+  <path d="M350 608V452a162 162 0 0 1 324 0v156z" fill="url(#sky)"/>
+  <circle cx="583" cy="405" r="47" fill="#f3d4a0"/>
+  <path d="M350 564q67-82 146-24 93-72 178 1v67H350z" fill="#97b29e"/>
+  <path d="M511 292v326m-165-111h331" stroke="#ead5b6" stroke-width="12"/>
+  <rect x="310" y="326" width="60" height="291" rx="24" fill="#d7b5af"/>
+  <rect x="653" y="326" width="60" height="291" rx="24" fill="#d7b5af"/>
+  <rect x="315" y="615" width="396" height="19" rx="6" fill="#b0947f"/>
+  <ellipse cx="512" cy="859" rx="284" ry="69" fill="#acbfa4"/>
+  <ellipse cx="512" cy="859" rx="256" ry="53" fill="none" stroke="#d4dfca" stroke-width="3"/>
+  <path d="m404 788-12 71m237-71 12 71" stroke="#9e7f6d" stroke-width="20" stroke-linecap="round"/>
+  <rect x="365" y="551" width="295" height="255" rx="82" fill="#91aca0"/>
+  <rect x="384" y="571" width="257" height="205" rx="70" fill="#b4ccbc"/>
+  <rect x="365" y="748" width="295" height="63" rx="28" fill="#c2d5c3"/>
+  <rect x="335" y="692" width="58" height="113" rx="26" fill="#a5beaf"/>
+  <rect x="630" y="692" width="58" height="113" rx="26" fill="#a5beaf"/>
+  <g fill="#c9bfd9">
+    <ellipse cx="513" cy="642" rx="115" ry="73"/>
+    <circle cx="429" cy="617" r="47"/><circle cx="474" cy="575" r="52"/>
+    <circle cx="537" cy="572" r="57"/><circle cx="589" cy="613" r="48"/>
+  </g>
+  <path d="M465 632q11 15 23 0m48 0q11 15 23 0m-57 31q15 17 30 0" stroke="#706780" fill="none" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="455" cy="658" rx="14" ry="7" fill="#d5aebd"/><ellipse cx="568" cy="658" rx="14" ry="7" fill="#d5aebd"/>
+  <path d="M795 762V511" stroke="#a48c7c" stroke-width="9"/>
+  <ellipse cx="795" cy="769" rx="41" ry="10" fill="#b39883"/>
+  <path d="m749 478-24 84h141l-25-84z" fill="#f0d09a"/>
+  <ellipse cx="795" cy="563" rx="70" ry="12" fill="#e7c18d"/>
+  <path d="M183 763q-37-113-53-129m53 129q35-121 74-144m-74 144q-10-157 16-185" fill="none" stroke="#90aa8d" stroke-width="8"/>
+  <g fill="#a1b797"><ellipse cx="138" cy="651" rx="18" ry="38" transform="rotate(-38 138 651)"/><ellipse cx="241" cy="645" rx="19" ry="42" transform="rotate(36 241 645)"/><ellipse cx="193" cy="601" rx="18" ry="39" transform="rotate(14 193 601)"/></g>
+  <path d="m148 739 11 80h58l12-80z" fill="#c19d87"/><rect x="141" y="730" width="94" height="18" rx="8" fill="#d3b19a"/>
+  <path d="m720 666 6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#f0d196"/>
+  <text x="512" y="951" text-anchor="middle" fill="#716b69" font-family="sans-serif" font-size="23" letter-spacing="4">THERE IS NO HURRY HERE</text>
+</svg>

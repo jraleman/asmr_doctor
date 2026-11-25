@@ -1,0 +1,93 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://games/asmr_doctor/intro.gd" id="1_intro"]
+[ext_resource type="PackedScene" path="res://ui/components/background.tscn" id="2_bg"]
+[ext_resource type="PackedScene" path="res://games/asmr_doctor/clinic_art.tscn" id="3_art"]
+
+[node name="ClinicWelcome" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_intro")
+
+[node name="Background" parent="." instance=ExtResource("2_bg")]
+
+[node name="IntroMargins" type="MarginContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="VBoxContainer" parent="IntroMargins"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="IntroStep" type="Label" parent="IntroMargins/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.77, 0.84, 0.72, 1)
+
+[node name="IntroBody" type="BoxContainer" parent="IntroMargins/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 32
+
+[node name="IntroArt" parent="IntroMargins/Layout/IntroBody" instance=ExtResource("3_art")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CopyScroll" type="ScrollContainer" parent="IntroMargins/Layout/IntroBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="Copy" type="VBoxContainer" parent="IntroMargins/Layout/IntroBody/CopyScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 24
+
+[node name="IntroHeading" type="Label" parent="IntroMargins/Layout/IntroBody/CopyScroll/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.965, 0.9, 0.78, 1)
+theme_override_font_sizes/font_size = 42
+autowrap_mode = 3
+
+[node name="IntroCopy" type="Label" parent="IntroMargins/Layout/IntroBody/CopyScroll/Copy"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="IntroMargins/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="SkipButton" type="Button" parent="IntroMargins/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Skip welcome"
+autowrap_mode = 3
+
+[node name="Space" type="Control" parent="IntroMargins/Layout/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="NextButton" type="Button" parent="IntroMargins/Layout/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Next"
+autowrap_mode = 3
