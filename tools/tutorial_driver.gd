@@ -19,7 +19,7 @@ func configure(variant: String) -> bool:
 func steps() -> Array[Dictionary]:
 	return [
 		{"time": 0.0, "title": "Make a little room for quiet",
-			"body": "Read your visitor's clue, then choose a gentle tool. There is no timer."},
+			"body": "You're the doctor. Hold right mouse to look; C switches views. Choose a gentle tool."},
 		{"time": 3.0, "title": "A soft, steady hush",
 			"body": "Hold the care button or care key for whispers and brushing."},
 		{"time": 9.0, "title": "Listen to their reaction",

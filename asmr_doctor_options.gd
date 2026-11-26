@@ -22,6 +22,7 @@ const TREAT_ACTION := &"asmr_doctor_treat"
 const JOURNAL_ACTION := &"asmr_doctor_journal"
 const SOUNDS_ACTION := &"asmr_doctor_sounds"
 const SLEEP_ACTION := &"asmr_doctor_sleep"
+const CAMERA_ACTION := &"asmr_doctor_camera"
 const TOOL_ACTIONS: Array[StringName] = [
 	&"asmr_doctor_whisper", &"asmr_doctor_tap", &"asmr_doctor_brush",
 	&"asmr_doctor_paper", &"asmr_doctor_crinkle", &"asmr_doctor_snip",
@@ -48,6 +49,9 @@ const CONTROL_BINDINGS: Array[Dictionary] = [
 		"action": SOUNDS_ACTION, "title": "Soundscapes", "player": 0},
 	{"key": "controls/asmr_doctor_sleep", "default": KEY_R,
 		"action": SLEEP_ACTION, "title": "Rest mode", "player": 0},
+	{"key": "controls/asmr_doctor_camera", "default": KEY_C,
+		"action": CAMERA_ACTION, "title": "Switch clinic view", "player": 0,
+		"description": "Switch between the first-person doctor camera and illustrated room."},
 ]
 
 const TUNABLES: Array[Dictionary] = [

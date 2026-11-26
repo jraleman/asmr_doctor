@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Real pointer/keyboard care, six complete appointments, pause, saves and layouts.
+## Camera switching, real care, six appointments, pause, saves and layouts.
 
 const Options := preload("res://games/asmr_doctor/asmr_doctor_options.gd")
 const Fixture := preload("res://games/asmr_doctor/tests/progress_fixture.gd")
@@ -22,7 +22,8 @@ func _run() -> void:
 	root.get_node("GameSession").call("configure_single_player")
 	_settings = root.get_node("Settings")
 	for key: String in ["ui/scale", "accessibility/reduced_motion",
-		Options.SILENT_KEY, Options.RAIN_KEY, Options.FIRE_KEY, Options.ROOM_KEY]:
+		Options.SILENT_KEY, Options.RAIN_KEY, Options.FIRE_KEY, Options.ROOM_KEY,
+		"controls/asmr_doctor_camera"]:
 		_original_settings[key] = _settings.call("get_value", key)
 	_settings.call("set_value", "ui/scale", 1.0)
 	_packed = load("res://games/asmr_doctor/gameplay.tscn") as PackedScene
@@ -31,6 +32,7 @@ func _run() -> void:
 		quit(1)
 		return
 	var game := await _open()
+	await _test_camera(game)
 	await _test_input_and_boundaries(game)
 	await _test_layouts(game)
 	await _test_two_shifts(game)
@@ -149,6 +151,105 @@ func _test_input_and_boundaries(game: Node) -> void:
 	await _click(game, game.get_node("%SheetContent/CloseSheet") as Button)
 
 
+func _test_camera(game: Node) -> void:
+	var first_person := game.get_node("%Clinic3D") as Control
+	var overview := game.get_node("%ClinicView") as Control
+	var camera := first_person.get("_camera") as Camera3D
+	var viewport := first_person.get("_viewport") as SubViewport
+	var model: RefCounted = game.get("_session")
+	var position := camera.position
+	_expect(first_person.visible and not overview.visible and camera.current
+		and viewport.own_world_3d,
+		"The clinic must start in an isolated, actual first-person Camera3D view.")
+	var baseline := float(model.get("stress"))
+	_view_pointer(first_person, MOUSE_BUTTON_LEFT, true)
+	game.call("_update_round", 0.5, 0.0)
+	var drift := InputEventMouseMotion.new()
+	drift.position = first_person.get_global_rect().end + Vector2(1000, 1000)
+	drift.button_mask = MOUSE_BUTTON_MASK_LEFT
+	root.push_input(drift, true)
+	var pointer: Vector2 = first_person.get("_pointer")
+	_expect(pointer.abs().x <= 1.0 and pointer.abs().y <= 1.0,
+		"Dragging care outside the clinic must keep the foreground tools in reach.")
+	_view_pointer(first_person, MOUSE_BUTTON_LEFT, false, Vector2(5, 5))
+	_expect(float(model.get("stress")) < baseline and not bool(game.get("_pointer_held")),
+		"Clicking the 3D clinic must give care and release outside its bounds.")
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	var original_rotation := camera.rotation
+	_look(Vector2(55, -20))
+	_expect(bool(first_person.get("_looking")) and camera.rotation != original_rotation
+		and camera.position == position,
+		"Right-button mouse-look must rotate a real camera without moving the doctor.")
+	_look(Vector2(10000, -10000))
+	_expect(absf(camera.rotation.y) <= 1.20001 and absf(camera.rotation.x) <= 0.60001,
+		"Mouse-look must stay within comfortable yaw and pitch limits.")
+	_key("controls/asmr_doctor_treat", true)
+	_key("controls/asmr_doctor_camera", true)
+	_key("controls/asmr_doctor_camera", false)
+	_key("controls/asmr_doctor_treat", false)
+	_expect(not first_person.visible and overview.visible
+		and not bool(first_person.get("_looking")) and not bool(game.get("_key_held"))
+		and not bool(game.get("_pointer_held")) and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"Switching cameras must restore the cursor and stop held care.")
+	baseline = float(model.get("stress"))
+	_view_pointer(overview, MOUSE_BUTTON_LEFT, true)
+	game.call("_update_round", 0.5, 0.0)
+	_view_pointer(overview, MOUSE_BUTTON_LEFT, false)
+	_expect(float(model.get("stress")) < baseline,
+		"The preserved illustrated room must still support pointer care.")
+	await _click(game, game.get_node("%CameraButton") as Button)
+	_expect(first_person.visible and not overview.visible,
+		"The on-screen view button must return to the doctor's camera.")
+	_settings.call("set_value", "controls/asmr_doctor_camera", KEY_V)
+	_expect((game.get_node("%CameraButton") as Button).text.ends_with("/ V"),
+		"The camera button must display the shared rebindable camera key.")
+	_key("controls/asmr_doctor_camera", true)
+	_key("controls/asmr_doctor_camera", false)
+	_expect(overview.visible, "Rebinding the camera action must change the actual switch key.")
+	_key("controls/asmr_doctor_camera", true)
+	_key("controls/asmr_doctor_camera", false)
+	_settings.call("set_value", "controls/asmr_doctor_camera",
+		_original_settings["controls/asmr_doctor_camera"])
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	_view_pointer(first_person, MOUSE_BUTTON_LEFT, true)
+	_expect(bool(game.get("_pointer_held")),
+		"Left-button care must work while looking, even over the shell's side panel.")
+	_view_pointer(first_person, MOUSE_BUTTON_LEFT, false, Vector2(5, 5))
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, false, Vector2(5, 5))
+	_expect(not bool(first_person.get("_looking")) and not bool(game.get("_pointer_held"))
+		and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"Releasing right mouse outside the clinic must always restore the cursor.")
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	game.call("_open_sheet", "journal")
+	_key("controls/asmr_doctor_camera", true)
+	_key("controls/asmr_doctor_camera", false)
+	_expect(not bool(first_person.get("_looking")) and first_person.visible,
+		"Opening a sheet must release mouse-look and block camera switching behind it.")
+	game.call("_close_sheet")
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	game.call("open_pause_menu")
+	_expect(not bool(first_person.get("_looking"))
+		and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"Pause must release the captured cursor for shared menus.")
+	var pause: Node = game.get("_pause_menu")
+	pause.call("resume")
+	await process_frame
+	_expect(bool(first_person.get("_input_enabled")) and not bool(first_person.get("_looking")),
+		"Resuming must allow mouse-look without automatically recapturing the cursor.")
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	root.focus_exited.emit()
+	_expect(not bool(first_person.get("_looking"))
+		and not bool(first_person.get("_input_enabled"))
+		and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"Focus loss must stop camera input and release mouse capture.")
+	root.focus_entered.emit()
+	_view_pointer(first_person, MOUSE_BUTTON_RIGHT, true)
+	game.call("_toggle_rest")
+	_expect(not bool(first_person.get("_looking")) and bool(first_person.get("sleeping")),
+		"Rest mode must release mouse-look and remove the 3D patient.")
+	game.call("_toggle_rest")
+
+
 func _test_layouts(game: Node) -> void:
 	for dimensions: Vector2i in [Vector2i(320, 568), Vector2i(844, 390),
 		Vector2i(1280, 720), Vector2i(2560, 1080)]:
@@ -169,6 +270,9 @@ func _test_layouts(game: Node) -> void:
 				dimensions, clinic.get_rect(), bounds, scroll.size,
 			])
 		var tools: Dictionary = game.get("_tool_buttons")
+		var camera_button := game.get_node("%CameraButton") as Button
+		_expect(bounds.encloses(camera_button.get_global_rect()),
+			"The on-screen camera switch must stay reachable at %s." % dimensions)
 		for button: Button in tools.values():
 			_expect(button.size.x <= scroll.size.x + 1,
 				"Treatment buttons must fit their scroll area at %s." % dimensions)
@@ -185,6 +289,8 @@ func _test_layouts(game: Node) -> void:
 	_settings.call("set_value", "accessibility/reduced_motion", true)
 	_expect(not bool(game.get_node("%ClinicView").get("motion_enabled")),
 		"Reduced motion must park the original clinic illustration.")
+	_expect(not bool(game.get_node("%Clinic3D").get("motion_enabled")),
+		"Reduced motion must also park 3D patient and held-tool animations.")
 	_settings.call("set_value", "accessibility/reduced_motion", false)
 
 
@@ -195,6 +301,8 @@ func _test_two_shifts(game: Node) -> void:
 		for appointment in Options.APPOINTMENTS_PER_SHIFT:
 			var model: RefCounted = game.get("_session")
 			var patient_id := str(model.get("patient_id"))
+			_expect(str(game.get_node("%Clinic3D").get("patient_id")) == patient_id,
+				"The 3D patient must follow each real appointment transition.")
 			var tool := str(Options.PATIENTS[patient_id]["favorite"])
 			var buttons: Dictionary = game.get("_tool_buttons")
 			await _click(game, buttons[tool])
@@ -234,6 +342,11 @@ func _test_two_shifts(game: Node) -> void:
 		and str(store.call("equipped_id", Options.GAME_ID, Options.PLANT_SLOT)) == "asmr_moonflowers"
 		and str(game.get_node("%ClinicView").get("plant_id")) == "asmr_moonflowers",
 		"Earned currency must buy and visibly equip clinic decor through the shared Store.")
+	var art: RefCounted = game.get_node("%Clinic3D").get("_art")
+	_expect(str(art.get("_plant_id")) == "asmr_moonflowers",
+		"Purchased decor must update the 3D clinic as well as the illustrated view.")
+	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"Finishing a shift must leave the cursor available for results and menus.")
 
 
 func _test_damaged_save() -> void:
@@ -276,6 +389,23 @@ func _pointer(button: Button, pressed: bool) -> void:
 	event.global_position = event.position
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = pressed
+	root.push_input(event, true)
+
+
+func _view_pointer(view: Control, button: MouseButton, pressed: bool,
+	position := Vector2.INF) -> void:
+	var event := InputEventMouseButton.new()
+	event.position = view.get_global_rect().get_center() if position == Vector2.INF else position
+	event.global_position = event.position
+	event.button_index = button
+	event.pressed = pressed
+	root.push_input(event, true)
+
+
+func _look(relative: Vector2) -> void:
+	var event := InputEventMouseMotion.new()
+	event.relative = relative
+	event.screen_relative = relative
 	root.push_input(event, true)
 
 

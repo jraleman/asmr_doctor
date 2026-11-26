@@ -2,7 +2,7 @@
 
 **A little care. A little quieter.**
 
-A self-paced, illustrated Godot game about a tiny, magical clinic. Welcome an
+A self-paced, first-person Godot game about a tiny, magical clinic. Welcome an
 overbooked office worker, a worried knight, a grumpy cloud, a dragon, a ghost
 and a robot. Discover their favorite sounds and send them home a little lighter.
 
@@ -56,9 +56,19 @@ without losing the current patient. Return whenever you like.
 
 ## Controls and comfort
 
-Mouse: choose a tool, then hold or press the care button or clinic illustration.
+The clinic starts in a **3D doctor's view**, with the patient ahead and your
+selected tool in the foreground. The doctor stays stationary. **Hold right
+mouse** inside the clinic to look around; release it to use the cursor and menus.
+**C** or the on-screen **Room view / Doctor view** button switches between this
+camera and the original illustrated room. Both views share the same appointment,
+tools, progress and care controls. Switching releases held care and microphone
+capture. Pause, sheets, rest, focus loss and leaving the clinic also release
+mouse-look; returning never captures the cursor automatically.
+
+Mouse: choose a tool, then hold or press the care button or either clinic view.
 Keyboard defaults: **1-6** select tools, **Space** gives care, **J** opens the
-journal, **O** opens soundscapes, **R** toggles rest, and **Esc** pauses.
+journal, **O** opens soundscapes, **R** toggles rest, **C** switches the camera,
+and **Esc** pauses.
 Bindings are editable in the shared **Settings > Controls** tab. **Tab / Enter**
 navigate buttons. The care action remains available without a microphone.
 
@@ -104,10 +114,12 @@ can back up, restore or delete this game's progress independently. Damaged or
 newer clinic saves are never overwritten; earning is disabled with recovery
 instructions, while no-goal rest remains usable.
 
-All clinic art, six portraits, vector branding and procedural stereo audio are
-original and game-owned. Shop previews and share images reuse the real clinic
-illustration. Share images contain no microphone data; their QR opens the studio
-website, not a public patient record.
+The 3D clinic, all six patient models, foreground tools, illustrations, vector
+branding and procedural stereo audio are original and game-owned. The 3D view
+uses the host's Compatibility renderer and mirrors clinic lighting, reduced
+motion and equipped decor. Shop previews and share images retain the original
+clinic illustration. Share images contain no microphone data; their QR opens the
+studio website, not a public patient record.
 
 The shared How to Play screen includes a captioned recording of real care,
 patient transitions and rest mode. Regenerate it from the host with
@@ -131,8 +143,10 @@ godot --path ..\.. --script res://games/asmr_doctor/tests/clinic_view_test.gd --
 ```
 
 The scene suite preserves existing clinic progress, achievements, wallet and
-changed settings. It drives actual pointer/keyboard events through two complete
-shifts. The view suite needs a real Compatibility graphics window; optional
+changed settings. It checks camera switching, rebinding, stationary mouse-look
+and cursor release, then drives actual pointer/keyboard care through two complete
+shifts. The view suite renders all patients in both perspectives and all six
+foreground tools. It needs a real Compatibility graphics window; optional
 `--asmr-capture=<directory>` saves its rendered screens. On Windows, automated
 PowerShell runners must use `Start-Process -NoNewWindow -Wait -PassThru` and check
 `.ExitCode`, because the Godot GUI executable does not block `& godot`.

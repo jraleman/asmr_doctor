@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/game/game_shell.tscn" id="1_shell"]
 [ext_resource type="Script" path="res://games/asmr_doctor/gameplay.gd" id="2_game"]
 [ext_resource type="Script" path="res://games/asmr_doctor/clinic_view.gd" id="3_view"]
 [ext_resource type="Script" path="res://games/asmr_doctor/soundscape.gd" id="4_audio"]
 [ext_resource type="Script" path="res://games/asmr_doctor/microphone.gd" id="5_mic"]
+[ext_resource type="Script" path="res://games/asmr_doctor/clinic_3d.gd" id="6_3d"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_glass"]
 content_margin_left = 22.0
@@ -111,13 +112,54 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 1.7
 
-[node name="ClinicView" type="Control" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn"]
-unique_name_in_owner = true
+[node name="ClinicStage" type="Control" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="ClinicView" type="Control" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn/ClinicStage"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("3_view")
 interactive = true
+
+[node name="Clinic3D" type="Control" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn/ClinicStage"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_3d")
+
+[node name="CameraButton" type="Button" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn/ClinicStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 157.0
+offset_bottom = 54.0
+text = "Room view / C"
+tooltip_text = "Switch to the illustrated room view"
+
+[node name="ContrastBackdrop" type="ColorRect" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn/ClinicStage/CameraButton"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.13, 0.16, 0.17, 0.94)
 
 [node name="SoundCaption" type="Label" parent="HUD/Overlay/Clinic/Layout/ClinicBody/RoomColumn"]
 unique_name_in_owner = true

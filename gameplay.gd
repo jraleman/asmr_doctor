@@ -6,6 +6,7 @@ const Options := preload("res://games/asmr_doctor/asmr_doctor_options.gd")
 const Session := preload("res://games/asmr_doctor/clinic_session.gd")
 const Progress := preload("res://games/asmr_doctor/clinic_progress.gd")
 const View := preload("res://games/asmr_doctor/clinic_view.gd")
+const FirstPerson := preload("res://games/asmr_doctor/clinic_3d.gd")
 const Soundscape := preload("res://games/asmr_doctor/soundscape.gd")
 const Microphone := preload("res://games/asmr_doctor/microphone.gd")
 
@@ -15,6 +16,8 @@ const Microphone := preload("res://games/asmr_doctor/microphone.gd")
 @onready var _body: BoxContainer = %ClinicBody
 @onready var _room_column: VBoxContainer = %RoomColumn
 @onready var _view: View = %ClinicView
+@onready var _first_person: FirstPerson = %Clinic3D
+@onready var _camera_button: Button = %CameraButton
 @onready var _patient_panel: PanelContainer = %PatientPanel
 @onready var _patient_stack: VBoxContainer = %PatientStack
 @onready var _patient_details: VBoxContainer = %PatientDetails
@@ -100,6 +103,9 @@ func _build_playfield() -> void:
 	_care_button.button_up.connect(_care_up)
 	_view.care_pressed.connect(_care_down)
 	_view.care_released.connect(_care_up)
+	_first_person.care_pressed.connect(_care_down)
+	_first_person.care_released.connect(_care_up)
+	_camera_button.pressed.connect(_toggle_camera)
 	_next_button.pressed.connect(_next_patient)
 	_mic_button.pressed.connect(_toggle_microphone)
 	_mic.status_changed.connect(_on_mic_status)
@@ -236,6 +242,8 @@ func _input(event: InputEvent) -> void:
 		_open_sheet("sounds")
 	elif event.is_action_pressed(Options.SLEEP_ACTION):
 		_toggle_rest()
+	elif event.is_action_pressed(Options.CAMERA_ACTION):
+		_toggle_camera()
 	elif _can_treat() and event.is_action_pressed(Options.TREAT_ACTION):
 		_key_held = true
 		if str(Options.TOOLS[_session.tool_id]["kind"]) == "pulse":
@@ -375,6 +383,10 @@ func _refresh_frame() -> void:
 	_view.rhythm = _session.rhythm_phase()
 	_view.favorite = _session.favorite_found and _session.affinity() > 1.0
 	_view.queue_redraw()
+	_first_person.update_clinic(
+		_view.patient_id, _view.tool_id, _view.stress, _view.night,
+		_view.sleeping, _view.caring, _view.favorite, _view.rhythm
+	)
 	_scores[PLAYER_ONE] = _shift_patients * 100 \
 		+ (0 if _appointment_saved else roundi(_session.progress() * 100.0))
 	_update_scores()
@@ -426,7 +438,31 @@ func _refresh_controls() -> void:
 		"Return to clinic" if _sleep_mode else "Rest mode", "Pause / Settings / Decor"]:
 		popup.add_item(item)
 	_wallet_label.text = Store.format_points(game_id(), Store.points(game_id()))
-	_view.set_motion(not _reduced_motion_enabled and not _shade.visible and _round_active)
+	_refresh_camera_controls()
+
+
+func _toggle_camera() -> void:
+	if not _built or not _round_active or get_tree().paused \
+			or _shade.visible or _focus_suspended:
+		return
+	_stop_input()
+	_first_person.set_active(not _first_person.visible)
+	_view.visible = not _first_person.visible
+	_refresh_controls()
+	_refresh_frame()
+
+
+func _refresh_camera_controls() -> void:
+	var enabled := _round_active and not get_tree().paused \
+		and not _shade.visible and not _focus_suspended
+	_first_person.set_input_enabled(enabled and _first_person.visible)
+	_first_person.set_motion(enabled and not _reduced_motion_enabled)
+	_view.set_motion(enabled and not _reduced_motion_enabled and _view.visible)
+	var key := OS.get_keycode_string(Settings.binding_keycode("controls/asmr_doctor_camera"))
+	var target := "Room view" if _first_person.visible else "Doctor view"
+	_camera_button.text = "%s / %s" % [target, key]
+	_camera_button.tooltip_text = "Switch to %s. Hold right mouse in doctor view to look." % target
+	_camera_button.accessibility_name = "Switch to %s (%s)" % [target, key]
 
 
 func _toggle_rest() -> void:
@@ -484,6 +520,9 @@ func _stop_input() -> void:
 	_sound.set_microphone_active(false)
 	_sound.end_care()
 	_view.caring = false
+	_first_person.caring = false
+	_first_person.set_input_enabled(false)
+	_first_person.queue_redraw()
 
 
 func _can_treat() -> bool:
@@ -503,6 +542,7 @@ func _open_sheet(kind: String) -> void:
 		child.queue_free()
 	_shade.show()
 	_view.set_motion(false)
+	_first_person.set_motion(false)
 	match kind:
 		"journal":
 			_build_journal()
@@ -531,7 +571,7 @@ func _close_sheet() -> void:
 		return
 	_shade.hide()
 	_sheet_kind = ""
-	_view.set_motion(not _reduced_motion_enabled)
+	_refresh_camera_controls()
 	if is_instance_valid(_sheet_focus) and _sheet_focus.is_visible_in_tree():
 		_sheet_focus.grab_focus()
 	_sheet_focus = null
@@ -676,6 +716,7 @@ func _apply_equipment() -> void:
 	_view.lamp_id = Store.equipped_id(game_id(), Options.LAMP_SLOT)
 	_view.rug_id = Store.equipped_id(game_id(), Options.RUG_SLOT)
 	_view.queue_redraw()
+	_first_person.set_equipment(_view.plant_id, _view.lamp_id, _view.rug_id)
 
 
 func _on_equipment_changed(id: String, _slot: String, _item: String) -> void:
@@ -748,6 +789,10 @@ func _layout_clinic() -> void:
 	(%SoundsButton as Button).text = "Sounds" if portrait else "Soundscapes"
 	(%ClinicMenu as Button).text = "Menu" if portrait else "Menu / Decor"
 	_care_button.custom_minimum_size.y = 52.0 * unit
+	_camera_button.position = Vector2.ONE * 12.0 * unit
+	_camera_button.size = _camera_button.get_combined_minimum_size()
+	_first_person.hud_unit = unit
+	_first_person.queue_redraw()
 	_header.add_theme_constant_override("h_separation", roundi(8.0 * unit))
 	_header.add_theme_constant_override("v_separation", roundi(5.0 * unit))
 	_style_panel(_patient_panel, unit)
@@ -797,7 +842,10 @@ func _style_panel(panel: PanelContainer, unit: float) -> void:
 func _on_controls_changed() -> void:
 	super()
 	if _built:
-		_hint.text = "Hold for whispers/brushes; press for rhythmic tools. " \
+		var camera_key := OS.get_keycode_string(
+			Settings.binding_keycode("controls/asmr_doctor_camera"))
+		_hint.text = "Right mouse: look. %s: switch view. " % camera_key \
+			+ "Hold for whispers/brushes; press for rhythmic tools. " \
 			+ "Journal and soundscapes pause care. Mic is always opt-in."
 		_refresh_controls()
 
@@ -814,7 +862,7 @@ func _on_game_setting_changed(_key: String, _value: Variant) -> void:
 func _set_reduced_motion_enabled(value: bool) -> void:
 	super(value)
 	if _built:
-		_view.set_motion(not value and not _shade.visible and _round_active)
+		_refresh_camera_controls()
 
 
 func open_pause_menu() -> void:
@@ -831,6 +879,7 @@ func _finish_round() -> void:
 		_shade.hide()
 		_clinic.hide()
 		_view.set_motion(false)
+		_first_person.set_motion(false)
 
 
 func _round_points_earned(_one: int, _two: int) -> int:
@@ -885,6 +934,8 @@ func _notification(what: int) -> void:
 		return
 	if what == NOTIFICATION_PAUSED:
 		_stop_input()
+	elif what == NOTIFICATION_UNPAUSED:
+		_refresh_camera_controls()
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		_on_focus_exited()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
@@ -898,6 +949,7 @@ func _on_focus_exited() -> void:
 
 func _on_focus_entered() -> void:
 	_focus_suspended = false
+	_refresh_camera_controls()
 
 
 func _connect_web_focus() -> void:

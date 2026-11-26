@@ -60,7 +60,9 @@ static func manifest() -> GameManifest:
 		"instructions_demo_prompt": "SPEAK SOFTLY. TAKE YOUR TIME.",
 		"instructions_solo_summary": "Three appointments. No deadline. All input modes share the same care.",
 		"instructions_player_one_controls": (
-			"Choose a tool, then use the care button or the clinic chair. "
+			"Start in the 3D doctor's view. Hold right mouse to look; release for menus. "
+			+ "C or the view button switches to the illustrated room and back. "
+			+ "Choose a tool, then use the care button or click the clinic. "
 			+ "Hold for continuous care; press for individual rhythmic sounds. "
 			+ "Tab and Enter navigate the clinic. Esc pauses."
 		),

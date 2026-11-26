@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Real Compatibility rendering, six distinct portraits and compact UI captures.
+## Real Compatibility rendering in both perspectives, all tools and compact UI.
 
 const Options := preload("res://games/asmr_doctor/asmr_doctor_options.gd")
 var _failures := PackedStringArray()
@@ -36,17 +36,33 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	game.set_process(false)
+	game.call("_notification", Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 	var view := game.get_node("%ClinicView") as Control
+	var first_person := game.get_node("%Clinic3D") as Control
 	view.call("set_motion", false)
 	var portraits: Array[int] = []
+	var first_person_portraits: Array[int] = []
 	for id in Options.PATIENT_ORDER:
 		var queue: Array[String] = [id, "mira", "nimbus"]
 		game.set("_queue", queue)
 		game.set("_appointment_index", 0)
 		game.call("_begin_appointment")
 		view.call("set_motion", false)
+		first_person.call("set_motion", false)
 		await _settle()
 		var image := root.get_texture().get_image()
+		var first_crop := _portrait_rect(first_person, image)
+		var first_fingerprint := hash(image.get_region(first_crop).get_data())
+		_expect(not first_person_portraits.has(first_fingerprint),
+			"Each patient must have distinct actual 3D artwork: " + id)
+		first_person_portraits.append(first_fingerprint)
+		_expect(_has_picture(first_person, image),
+			"The first-person camera must render warm-colored 3D artwork: " + id)
+		_capture(image, "doctor_" + id)
+		game.call("_toggle_camera")
+		view.call("set_motion", false)
+		await _settle()
+		image = root.get_texture().get_image()
 		var crop := _portrait_rect(view, image)
 		var fingerprint := hash(image.get_region(crop).get_data())
 		_expect(not portraits.has(fingerprint), "Each patient must have distinct rendered artwork: " + id)
@@ -54,6 +70,8 @@ func _run() -> void:
 		_expect(not image.is_empty() and _has_picture(view, image),
 			"The clinic must render actual warm-colored artwork: " + id)
 		_capture(image, "clinic_" + id)
+		game.call("_toggle_camera")
+	await _test_3d_tools_and_look(game, first_person)
 	for layout: Dictionary in [
 		{"size": Vector2i(320, 568), "scale": 1.0},
 		{"size": Vector2i(844, 390), "scale": 1.0},
@@ -74,6 +92,9 @@ func _run() -> void:
 		_expect(care.is_visible_in_tree() and root.get_visible_rect().has_point(
 			care.get_global_rect().get_center()),
 			"Rendered care controls must remain reachable at %s." % dimensions)
+		var switch := game.get_node("%CameraButton") as Button
+		_expect(root.get_visible_rect().encloses(switch.get_global_rect()),
+			"The rendered camera switch must remain reachable at %s." % dimensions)
 		_capture(root.get_texture().get_image(), "layout_%dx%d_scale%.1f" % [
 			dimensions.x, dimensions.y, float(layout["scale"]),
 		])
@@ -99,6 +120,51 @@ func _run() -> void:
 		for failure in _failures:
 			printerr(failure)
 	quit(0 if _failures.is_empty() else 1)
+
+
+func _test_3d_tools_and_look(game: Node, view: Control) -> void:
+	var viewport := view.get("_viewport") as SubViewport
+	var tools: Array[int] = []
+	for id in Options.TOOL_ORDER:
+		view.call("update_clinic", "mira", id, 50.0, false, false, true, false, 0.6)
+		view.call("set_motion", false)
+		await _settle()
+		var image := viewport.get_texture().get_image()
+		var area := Rect2i(Vector2i(image.get_width() * 0.4, image.get_height() * 0.5),
+			Vector2i(image.get_width() * 0.6, image.get_height() * 0.5))
+		var fingerprint := hash(image.get_region(area).get_data())
+		_expect(not tools.has(fingerprint),
+			"Every selected tool must have distinct rendered foreground geometry: " + id)
+		tools.append(fingerprint)
+		_capture(root.get_texture().get_image(), "doctor_tool_" + id)
+	view.call("update_clinic", "mira", "brush", 20.0, true, false, false, true, 0.6)
+	view.call("set_motion", false)
+	await _settle()
+	_capture(root.get_texture().get_image(), "doctor_midnight")
+	var before := hash(viewport.get_texture().get_image().get_data())
+	var camera := view.get("_camera") as Camera3D
+	var position := camera.position
+	var press := InputEventMouseButton.new()
+	press.position = view.get_global_rect().get_center()
+	press.button_index = MOUSE_BUTTON_RIGHT
+	press.pressed = true
+	root.push_input(press, true)
+	var motion := InputEventMouseMotion.new()
+	motion.relative = Vector2(90, -20)
+	motion.screen_relative = motion.relative
+	root.push_input(motion, true)
+	await _settle()
+	_expect(hash(viewport.get_texture().get_image().get_data()) != before
+		and camera.position == position,
+		"Actual mouse-look must change the rendered 3D perspective without moving the doctor.")
+	_capture(root.get_texture().get_image(), "doctor_mouse_look")
+	motion.relative = -motion.relative
+	motion.screen_relative = motion.relative
+	root.push_input(motion, true)
+	var release := press.duplicate() as InputEventMouseButton
+	release.pressed = false
+	root.push_input(release, true)
+	game.call("_refresh_frame")
 
 
 func _test_welcome() -> void:
